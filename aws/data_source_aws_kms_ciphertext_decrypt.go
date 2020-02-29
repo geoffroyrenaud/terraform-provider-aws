@@ -1,11 +1,11 @@
 package aws
 
 import (
-	"encoding/base64"
+	//"encoding/base64"
 	"log"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
+	//"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -17,7 +17,7 @@ func dataSourceAwsKmsCiphertextDecrypt() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"plaintext": {
 				Type:      schema.TypeString,
-				Required:  true,
+				Computed:  true,
 				Sensitive: true,
 			},
 
@@ -34,7 +34,7 @@ func dataSourceAwsKmsCiphertextDecrypt() *schema.Resource {
 
 			"ciphertext_blob": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Required: true,
 			},
 		},
 	}
@@ -46,8 +46,8 @@ func dataSourceAwsKmsCiphertextDecryptRead(d *schema.ResourceData, meta interfac
 	d.SetId(time.Now().UTC().String())
 
 	req := &kms.DecryptInput{
-		KeyId:          aws.String(d.Get("key_id").(string)),
-		CiphertextBlob: []byte(d.Get("plaintext").(string)),
+		// KeyId:          aws.String(d.Get("key_id").(string)),
+		CiphertextBlob: []byte(d.Get("ciphertext_blob").(string)),
 	}
 
 	if ec := d.Get("context"); ec != nil {
@@ -60,7 +60,8 @@ func dataSourceAwsKmsCiphertextDecryptRead(d *schema.ResourceData, meta interfac
 		return err
 	}
 
-	d.Set("plaintext", base64.StdEncoding.EncodeToString(resp.Plaintext))
+	//d.Set("plaintext", base64.StdEncoding.DecodeString(resp.Plaintext))
+	d.Set("plaintext", resp.Plaintext)
 
 	return nil
 }
